@@ -1,5 +1,7 @@
+import enum
 from core import db
 from core.libs import helpers
+from sqlalchemy.types import Enum as BaseEnum
 
 
 class Teacher(db.Model):
@@ -11,3 +13,7 @@ class Teacher(db.Model):
 
     def __repr__(self):
         return '<Teacher %r>' % self.id
+    
+    @classmethod
+    def get_teachers_from_principal(cls):
+        return Teacher.query.all()

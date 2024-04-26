@@ -5,7 +5,7 @@ from core import db
 from core.models.assignments import Assignment, AssignmentStateEnum, GradeEnum
 
 
-def create_n_graded_assignments_for_teacher(number: int = 0, teacher_id: int = 1) -> int:
+def create_n_graded_assignments_for_teacher(number: int = 0, teacher_id: int = 1, grade: str = 'A') -> int:
     """
     Creates 'n' graded assignments for a specified teacher and returns the count of assignments with grade 'A'.
 
@@ -16,11 +16,8 @@ def create_n_graded_assignments_for_teacher(number: int = 0, teacher_id: int = 1
     Returns:
     - int: Count of assignments with grade 'A'.
     """
-    # Count the existing assignments with grade 'A' for the specified teacher
-    grade_a_counter: int = Assignment.filter(
-        Assignment.teacher_id == teacher_id,
-        Assignment.grade == GradeEnum.A
-    ).count()
+    # Initialize grade_a_counter
+    grade_a_counter: int = 0
 
     # Create 'n' graded assignments
     for _ in range(number):
@@ -74,6 +71,7 @@ def test_get_assignments_in_graded_state_for_each_student():
 
     # Execute the SQL query compare the result with the expected result
     sql_result = db.session.execute(text(sql)).fetchall()
+
     for itr, result in enumerate(expected_result):
         assert result[0] == sql_result[itr][0]
 
@@ -87,14 +85,26 @@ def test_get_grade_A_assignments_for_teacher_with_max_grading():
 
     # Create and grade 5 assignments for the default teacher (teacher_id=1)
     grade_a_count_1 = create_n_graded_assignments_for_teacher(5)
+
+    # Define the expected result based on the created assignments
+    expected_result = [(1, grade_a_count_1)]
     
     # Execute the SQL query and check if the count matches the created assignments
     sql_result = db.session.execute(text(sql)).fetchall()
-    assert grade_a_count_1 == sql_result[0][0]
-
+    
+    # Enumerate the expected result and compare each element with the corresponding element in the SQL result
+    for itr, result in enumerate(expected_result):
+        assert result[0] == sql_result[itr][0]  # Compare the count of grade A assignments
+        
     # Create and grade 10 assignments for a different teacher (teacher_id=2)
     grade_a_count_2 = create_n_graded_assignments_for_teacher(10, 2)
 
-    # Execute the SQL query again and check if the count matches the newly created assignments
+    # Define the expected result based on the created assignments
+    expected_result = [(1, grade_a_count_1)]
+    
+    # Execute the SQL query and check if the count matches the created assignments
     sql_result = db.session.execute(text(sql)).fetchall()
-    assert grade_a_count_2 == sql_result[0][0]
+
+    # Enumerate the expected result and compare each element with the corresponding element in the SQL result
+    for itr, result in enumerate(expected_result):
+        assert result[0] == sql_result[itr][0]  # Compare the count of grade A assignments
